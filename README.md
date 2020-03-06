@@ -1,5 +1,5 @@
 # element-admin
-> A simple project of admin
+> A admin website for managing hospital
 
 ## Build Setup
 
