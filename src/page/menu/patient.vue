@@ -16,7 +16,8 @@
             <el-input placeholder="请输入手机号码" size="mini" v-model="select.patient_phone" maxlength="11"></el-input>
           </el-col>
         </el-col>
-        <el-button type="primary">查询</el-button>
+        <el-button type="primary" @click="selectPatientList2">查询</el-button>
+        <!-- <el-button type="primary" @click="showDialogVisable(1)">新增</el-button> -->
       </el-row>
 
       <el-row class="input-box" :gutter="20">
@@ -47,6 +48,7 @@
       stripe = true
       border
       style="width: 100%"
+      v-loading="loading"
     >
       <el-table-column prop="patient_id" label="ID" width="80"></el-table-column>
       <el-table-column prop="patient_name" label="姓名" width="80"></el-table-column>
@@ -61,8 +63,8 @@
             label="操作"
             width="100">
             <template slot-scope="scope">
-              <el-button @click="handleClickUpdate(scope.row)" type="text" size="small">修改</el-button>
-              <el-button @click="deleteDialogVisible = true"   type="text" size="small">删除</el-button>
+              <el-button @click="showDialogVisable(scope.row)" type="text" size="small">修改</el-button>
+              <el-button @click="showDeleteDialog(scope.row)"   type="text" size="small">删除</el-button>
             </template>
        </el-table-column>
     </el-table>
@@ -85,21 +87,21 @@
       :before-close="handleClose">
       <span>是否确认删除</span>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="deleteDialogVisible = false">确 定</el-button>
+        <el-button type="primary" @click="deletePatient()">确 定</el-button>
         <el-button @click="deleteDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
 
     <!-- 修改数据 -->
-    <el-dialog title="修改就诊人信息" :visible.sync="updateDialogVisible" width="30%">
-      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="姓名" prop="name">
+    <el-dialog title="就诊人信息" :visible.sync="dialogVisible" width="30%">
+      <el-form :model="ruleForm"  ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="姓名" prop="patient_name">
           <el-input v-model="ruleForm.patient_name" width="50"></el-input>
         </el-form-item>
-        <el-form-item label="身份证号码" prop="name">
+        <el-form-item label="身份证号码" prop="patient_card">
           <el-input v-model="ruleForm.patient_card"></el-input>
         </el-form-item>
-        <el-form-item label="出生年月" prop="name">
+        <el-form-item label="出生年月" prop="patient_birth">
           <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.patient_birth" style="width: 100%;"></el-date-picker>
         </el-form-item>
         <el-form-item label="性别" prop="patient_sex">
@@ -108,10 +110,10 @@
             <el-option label="女" value="0"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="手机号码" prop="name">
+        <el-form-item label="手机号码" prop="patient_phone">
           <el-input v-model="ruleForm.patient_phone"></el-input>
         </el-form-item>
-        <el-form-item label="关系" prop="patient_sex">
+        <el-form-item label="关系" prop="patient_relationship">
           <el-select v-model="ruleForm.patient_relationship" placeholder="请选择与用户的关系">
             <el-option label="自己" value="自己"></el-option>
             <el-option label="父母" value="父母"></el-option>
@@ -123,7 +125,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="submitForm('ruleForm')">确认</el-button>
-          <el-button @click="updateDialogVisible = false">取消</el-button>
+          <el-button @click="dialogVisible = false">取消</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -138,44 +140,23 @@ export default {
   data() {
     return {
       deleteDialogVisible: false,
-      updateDialogVisible : false,
+      dialogVisible : false,
       totalPage: 100,
-      tableData: [
-        {
-          patient_name : '潘伟健',
-          patient_sex : '男',
-          patient_card : '440921199806182135',
-          patient_phone : '155211686841',
-          patient_birth : '2020-02-03',
-          patient_id : '2',
-          patient_relationship : '自己',
-          user_id : '9',
-        },
-        {
-          patient_name : '潘伟健',
-          patient_sex : '男',
-          patient_card : '440921199806182135',
-          patient_phone : '155211686841',
-          patient_birth : '2020-02-03',
-          patient_id : '2',
-          patient_relationship : '自己',
-          user_id : '9',
-        },
-      ],
-      ruleForm: '',
+      type : 0,  //判断修改弹出框是什么状态 0是默认没有被调用，1是新增，2是修改
+      tableData: [],
+      ruleForm: {},
       select : {
         patient_name : '',
         patient_phone : '',
         patient_sex : '',
         patient_card : ''
-      }
+      },
+      loading : false,
+      deleteData : ''
     };
   },
   methods: {
-    handleClickUpdate(row){
-      this.updateDialogVisible = 1
-      this.ruleForm = row
-    },
+    //清空查询框内容
     clearSelect(){
       this.select = {
         patient_name : '',
@@ -184,33 +165,133 @@ export default {
         patient_card : ''
       }
     },
-    receivePageSize(val) {
-      console.log(val);
+
+    //显示删除提示框
+    showDeleteDialog(row){
+      this.deleteData = row
+      this.deleteDialogVisible = true
     },
-    receiveCurrentPage(val) {
-      console.log(val);
+
+    //删除就诊人
+    deletePatient(){
+      var url = '/api/patient/delete_patient'
+      var data = {
+        'patient_id' : this.deleteData.patient_id
+      }
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.deleteDialogVisible = false
+          this.selectPatientList()
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
     },
-    // 修改table header的背景色
-    tableHeaderColor({ row, column, rowIndex, columnIndex }) {
-      if (rowIndex === 0) {
-        return "background-color: #F7F6Fd;color: #B6B5C2;font-weight: 500;";
+
+    selectPatient(){
+      var url = '/api/patient/select_patient'
+      var data = this.select
+      this.gRequest2(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //弹出新增或更新就诊人弹窗
+    showDialogVisable(row){
+      let that = this
+      that.ruleForm = JSON.parse(JSON.stringify(row));
+      this.dialogVisible = 1
+    },
+
+    //提交表单
+    submitForm(){
+      if(this.type == 1){
+        this.addPatient()
+      }else{
+        this.updatePatient()
       }
     },
 
-    gRequest(){
-      var request = require('request');
-    }
+    //新增就诊人
+    addPatient(){
+      var url = '/api/patient/add_patient'
+      var data = this.ruleForm
+      this.gRequest2(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //修改就诊人
+    updatePatient(){
+      var url = '/api/patient/update_patient'
+      var data = this.ruleForm
+      this.gRequest2(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //查询所有就诊人的信息
+    selectPatientList(){
+      this.loading = true
+      var url = '/api/patient/select_patient_list_admin'
+      var data = this.ruleForm
+      this.gRequest(url,data).then(res => {
+        this.loading = false
+        if(res.code == 200){
+          // this.returnMsg(res.msg)
+          this.tableData = res.data
+          this.totalPage = res.count
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //根据用户的查询条件查询就诊人列表
+    selectPatientList2(){
+      this.loading = true
+      var url = '/api/patient/select_patient_list_admin_by'
+      var data = this.select
+      this.gRequest(url,data).then(res => {
+        this.loading = false
+        if(res.code == 200){
+          // this.returnMsg(res.msg)
+          this.tableData = res.data
+          this.totalPage = res.count
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
   },
   watch: {
     DateValue(newval, oldval) {
-      console.log(newval);
-      console.log(oldval);
+      // console.log(newval);
+      // console.log(oldval);
     }
+  },
+  created(){
+    // this.addPatient()
+    this.selectPatientList()
   },
   components: {
     pagination
   }
-};
+}
 </script>
 
 <style scoped lang="scss">

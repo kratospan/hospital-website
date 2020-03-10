@@ -11,15 +11,22 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-        '/api/': {
-          target: '',
-          changeOrigin: true
-        }
+        '/tp5/*': {
+          target: 'http://localhost:80',
+          changeOrigin: true, //支持跨域
+        },
+        '/api': {
+          target: 'http://localhost:80/tp5/public/index.php/api', // 后端接口地址
+          changeOrigin: true, // 是否允许跨越
+          pathRewrite: {
+            '^/api': '/'
+          }
+        },
     },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
-    port: 8089, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
+    port: 8080, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: true,
     errorOverlay: true,
     notifyOnErrors: true,

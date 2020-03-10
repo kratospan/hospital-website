@@ -24,7 +24,7 @@
         </el-col>
     <el-col :span="24" class="main">
       <aside :class="'menu-expanded'">
-        <!--导航菜单-->
+        <!-- 导航菜单 -->
        <el-menu :default-active="$route.path" ref="bigmenu" class="el-menu-vertical-demo" background-color="#545c64" text-color="#fff" unique-opened router>
          <template v-for="(item,index) in $router.options.routes" v-if="!item.hidden && checkContains(item.name)">
            <el-submenu :index="index+''" v-if="!item.single">
@@ -41,10 +41,10 @@
        <div class="grid-content bg-purple-light">
          <el-row class="nav-tabs">
           <el-col :span="24">
-            <div @click="changeRouter(index)" v-for="(option, index) in arry" class="cus-tab-box" :class="activepath==option.path?'activeTab':''">
+            <!-- <div @click="changeRouter(index)" v-for="(option, index) in arry" class="cus-tab-box" :class="activepath==option.path?'activeTab':''">
               <span>{{option.name}}</span>
               <span @click.stop="arry.length!=1 && removeTab(index)"><i class="fa fa-times close-icon" aria-hidden="true"></i></span>
-            </div>
+            </div> -->
           </el-col>
          </el-row>
          <el-col :span="24" class="content-wrapper">
