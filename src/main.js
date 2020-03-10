@@ -108,3 +108,14 @@ Vue.prototype.returnMsg = function(content,type = 'success'){
         type: type
       });
 }
+
+Vue.prototype.turnDateToTime = function(data){
+    // console.log(123123,data)
+    var year = 2020
+    var month = data.getMonth() + 1
+    var date = data.getDate()
+    var time = year+'-'+month+'-'+date+' 8:0:0'
+    var day = (new Date(time).getTime())/1000
+    return day
+}
+

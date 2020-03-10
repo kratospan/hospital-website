@@ -4,68 +4,32 @@
       <el-row class="input-box" :gutter="20">
         <!-- 姓名 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">姓名：</el-col>
+          <el-col :span="8" class="label">套餐ID：</el-col>
           <el-col :span="16">
-            <el-input placeholder="请输入姓名" size="mini" v-model="select.doctor_name"></el-input>
+            <el-input placeholder="请输入套餐ID" size="mini" v-model="select.meal_id"></el-input>
           </el-col>
         </el-col>
         <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">部门：</el-col>
+          <el-col :span="8" class="label">名称：</el-col>
           <el-col :span="16">
-            <el-select size="mini"  v-model="select.department_name" placeholder="请选择部门">
-              <el-option
-                v-for="item in departmentList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <el-input placeholder="请输入名称" size="mini" v-model="select.meal_name"></el-input>
           </el-col>
         </el-col>
-         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">头衔：</el-col>
-          <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_title" placeholder="请选择头衔">
-              <el-option label="主任医师" value="0"></el-option>
-              <el-option label="副主任医师" value="1"></el-option>
-              <el-option label="主治医师" value="2"></el-option>
-              <el-option label="住院医师" value="3"></el-option>
-              <!-- 0是主任医师，1是副主任医师，2是主治医师，3是住院医师 -->
-            </el-select>
-          </el-col>
-        </el-col>
+         
         
       </el-row>
 
       <el-row class="input-box" :gutter="20">
         <!-- 性别选择 -->
-       
-        <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">性别：</el-col>
+          <el-col :span="8" class="label">费用：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_sex" placeholder="请选择性别">
-              <el-option label="男" value="1"></el-option>
-              <el-option label="女" value="0"></el-option>
-            </el-select>
+            <el-input placeholder="请输入费用" size="mini" type="number" v-model="select.meal_cost"></el-input>
           </el-col>
         </el-col>
-        <!-- 性别选择 -->
-        <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">科室：</el-col>
-          <el-col :span="16">
-            <el-select size="mini" v-model="select.office_name" placeholder="请选择科室">
-              <el-option
-                v-for="item in officeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </el-col>
-        </el-col>
-        <el-button type="primary" @click="selectDoctorList()">查询</el-button>
+        
+        <el-button type="primary" @click="selectMealList()">查询</el-button>
         <el-button type="primary" @click="showDialogVisable(1)">新增</el-button>
         <el-button type="primary" @click="clearSelect">清空</el-button>
       </el-row>
@@ -77,18 +41,15 @@
       size="mini"
       stripe = true
       border
+      height="500"
       style="width: 100%"
       v-loading="loading"
     >
-      <el-table-column prop="doctor_id" label="ID" width="80"></el-table-column>
-      <el-table-column prop="doctor_name" label="姓名" width="80"></el-table-column>
-      <el-table-column prop="department_name" label="部门"></el-table-column>
-      <el-table-column prop="office_name" label="科室"></el-table-column>
-      <el-table-column prop="doctor_sex" label="性别"></el-table-column>
-      <el-table-column prop="doctor_title" label="头衔"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_introduce" label="介绍"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_good" label="擅长"></el-table-column>
-      <el-table-column prop="doctor_payment" label="挂号费用"></el-table-column>
+      <el-table-column prop="meal_id" label="ID" width="80"></el-table-column>
+      <el-table-column prop="meal_name" label="名称"></el-table-column>
+      <el-table-column prop="meal_introduce" show-overflow-tooltip="true" label="介绍"></el-table-column>
+      <el-table-column prop="meal_attention" show-overflow-tooltip="true" label="注意事项"></el-table-column>
+      <el-table-column prop="meal_cost" label="费用" width="100"></el-table-column>
       <el-table-column
             fixed="right"
             label="操作"
@@ -124,25 +85,22 @@
     </el-dialog>
 
     <!-- 修改数据 -->
-    <el-dialog title="医生信息" :visible.sync="dialogVisible" width="30%">
+    <el-dialog title="套餐信息" :visible.sync="dialogVisible" width="50%">
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="ruleForm.doctor_name" width="50"></el-input>
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="ruleForm.meal_name" width="50"></el-input>
         </el-form-item>
         <el-form-item label="介绍" prop="introduce">
-          <el-input v-model="ruleForm.doctor_introduce"></el-input>
+          <el-input v-model="ruleForm.meal_introduce" type="textarea"></el-input>
         </el-form-item>
-        <el-form-item label="挂号费用" prop="payment">
-          <el-input v-model="ruleForm.doctor_payment" type="number"></el-input>
+        <el-form-item label="注意事项" prop="payment">
+          <el-input v-model="ruleForm.meal_attention" type="textarea" ></el-input>
         </el-form-item>
         <!-- <el-form-item label="出生年月" prop="name">
           <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.doctor_birth" style="width: 100%;"></el-date-picker>
         </el-form-item> -->
-        <el-form-item label="性别" prop="doctor_sex">
-          <el-select v-model="ruleForm.doctor_sex" placeholder="请选择性别">
-            <el-option label="男" value="1"></el-option>
-            <el-option label="女" value="0"></el-option>
-          </el-select>
+        <el-form-item label="费用" prop="cost">
+          <el-input v-model="ruleForm.meal_cost" type="number" ></el-input>
         </el-form-item>
         <!-- 部门  -->
         <el-form-item label="部门" prop="department_name">
@@ -207,28 +165,28 @@ export default {
       ruleForm: {},
       deleteData : '',
       select : {
-        doctor_name : '',
-        doctor_sex : '',
-        department_id : '',
-        office_id : ''
+        meal_name : '',
+        meal_cost : '',
+        meal_id : ''
       }
     };
   },
   methods: {
     //清空查询框内容
     clearSelect(){
-      this.select = {}
+      this.select = {
+        meal_name : '',
+        meal_cost : '',
+        meal_id : ''
+      }
+      this.selectMealList()
     },
 
     //弹出新增或更新就诊人弹窗
     showDialogVisable(type,row={
-      doctor_name : '',
-      doctor_sex : '',
-      doctor_introduce : '',
-      doctor_good : '',
-      doctor_title : '',
-      department_id : '',
-      office_id : '',
+      meal_name : '',
+        meal_cost : '',
+        meal_id : ''
     }){
       this.type = type
       this.ruleForm = row
@@ -269,7 +227,7 @@ export default {
         if(res.code == 200){
           this.returnMsg(res.msg)
           this.deleteDialogVisible = false
-          this.selectDoctorList()
+          this.selectMealList()
         }else{
           this.returnMsg(res.msg,'error')
         }
@@ -301,7 +259,7 @@ export default {
         if(res.code == 200){
           this.returnMsg(res.msg)
           this.dialogVisible= false
-          this.selectDoctorList()
+          this.selectMealList()
         }else{
           this.returnMsg(res.msg,'error')
         }
@@ -317,17 +275,17 @@ export default {
         if(res.code == 200){
           this.returnMsg(res.msg)
           this.dialogVisible= false
-          this.selectDoctorList()
+          this.selectMealList()
         }else{
           this.returnMsg(res.msg,'error')
         }
       })
     },
     
-    //查询所有医生信息
-    selectDoctorList(){
+    //查询所有套餐信息
+    selectMealList(){
       this.loading = true
-      var url = '/api/doctor/select_doctor_list_admin'
+      var url = '/api/meal/select_meal_list_admin'
       var data = this.select
       this.gRequest(url,data).then(res => {
         this.loading = false
@@ -414,9 +372,9 @@ export default {
     }
   },
   created(){
-    this.selectOfficeList()
-    this.selectDoctorList()
-    this.selectDepartmentList()
+    // this.selectOfficeList()
+    this.selectMealList()
+    // this.selectDepartmentList()
   },
   components: {
     pagination

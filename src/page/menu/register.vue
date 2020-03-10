@@ -4,35 +4,26 @@
       <el-row class="input-box" :gutter="20">
         <!-- 姓名 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">姓名：</el-col>
+          <el-col :span="8" class="label">医生姓名：</el-col>
           <el-col :span="16">
             <el-input placeholder="请输入姓名" size="mini" v-model="select.doctor_name"></el-input>
           </el-col>
         </el-col>
         <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">部门：</el-col>
+          <el-col :span="8" class="label">就诊人姓名：</el-col>
           <el-col :span="16">
-            <el-select size="mini"  v-model="select.department_name" placeholder="请选择部门">
-              <el-option
-                v-for="item in departmentList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <el-input placeholder="请输入就诊人姓名" size="mini" v-model="select.patient_name"></el-input>
           </el-col>
         </el-col>
          <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">头衔：</el-col>
+          <el-col :span="8" class="label">预约时间：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_title" placeholder="请选择头衔">
-              <el-option label="主任医师" value="0"></el-option>
-              <el-option label="副主任医师" value="1"></el-option>
-              <el-option label="主治医师" value="2"></el-option>
-              <el-option label="住院医师" value="3"></el-option>
-              <!-- 0是主任医师，1是副主任医师，2是主治医师，3是住院医师 -->
-            </el-select>
+            <el-date-picker
+              v-model="select.register_date"
+              type="date"
+              placeholder="选择预约时间">
+            </el-date-picker>
           </el-col>
         </el-col>
         
@@ -43,30 +34,30 @@
        
         <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">性别：</el-col>
+          <el-col :span="8" class="label">预约时段：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_sex" placeholder="请选择性别">
-              <el-option label="男" value="1"></el-option>
-              <el-option label="女" value="0"></el-option>
+            <el-select size="mini" v-model="select.register_time" placeholder="请选择预约时段">
+              <el-option label="08:00-09:00" value="0"></el-option>
+              <el-option label="09:00-10:00" value="1"></el-option>
+              <el-option label="10:00-11:00" value="2"></el-option>
+              <el-option label="14:00-15:00" value="3"></el-option>
+              <el-option label="15:00-16:00" value="4"></el-option>
+              <el-option label="16:00-17:00" value="5"></el-option>
+              <!-- 0是主任医师，1是副主任医师，2是主治医师，3是住院医师 -->
             </el-select>
           </el-col>
         </el-col>
         <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">科室：</el-col>
+          <el-col :span="8" class="label">预约状态：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.office_name" placeholder="请选择科室">
-              <el-option
-                v-for="item in officeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
+            <el-select size="mini" v-model="select.register_status" placeholder="请选择预约状态">
+              <el-option label="预约成功" value="0"></el-option>
+              <el-option label="预约取消" value="1"></el-option>
             </el-select>
           </el-col>
         </el-col>
-        <el-button type="primary" @click="selectDoctorList()">查询</el-button>
-        <el-button type="primary" @click="showDialogVisable(1)">新增</el-button>
+        <el-button type="primary" @click="selectRegisterList()">查询</el-button>
         <el-button type="primary" @click="clearSelect">清空</el-button>
       </el-row>
 
@@ -80,21 +71,17 @@
       style="width: 100%"
       v-loading="loading"
     >
-      <el-table-column prop="doctor_id" label="ID" width="80"></el-table-column>
-      <el-table-column prop="doctor_name" label="姓名" width="80"></el-table-column>
-      <el-table-column prop="department_name" label="部门"></el-table-column>
-      <el-table-column prop="office_name" label="科室"></el-table-column>
-      <el-table-column prop="doctor_sex" label="性别"></el-table-column>
-      <el-table-column prop="doctor_title" label="头衔"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_introduce" label="介绍"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_good" label="擅长"></el-table-column>
-      <el-table-column prop="doctor_payment" label="挂号费用"></el-table-column>
+      <el-table-column prop="register_id" label="ID" width="80"></el-table-column>
+      <el-table-column prop="doctor_name" label="医生姓名" width="80"></el-table-column>
+      <el-table-column prop="patient_name" label="就诊人姓名"></el-table-column>
+      <el-table-column show-overflow-tooltip="true" prop="register_date" label="预约时间"></el-table-column>
+      <el-table-column prop="register_time" label="预约时段"></el-table-column>
+      <el-table-column prop="register_status" label="预约状态"></el-table-column>
       <el-table-column
             fixed="right"
             label="操作"
             width="100">
             <template slot-scope="scope">
-              <el-button @click="showDialogVisable(2,scope.row)" type="text" size="small">修改</el-button>
               <el-button @click="showDeleteDialog(scope.row)"   type="text" size="small">删除</el-button>
             </template>
        </el-table-column>
@@ -118,7 +105,7 @@
       :before-close="handleClose">
       <span>是否确认删除</span>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="deleteDoctor()">确 定</el-button>
+        <el-button type="primary" @click="deleteRegister()">确 定</el-button>
         <el-button @click="deleteDialogVisible = false">取 消</el-button>
       </span>
     </el-dialog>
@@ -207,28 +194,37 @@ export default {
       ruleForm: {},
       deleteData : '',
       select : {
+        register_id : '',
+        register_status : '',
+        patient_name : '',
         doctor_name : '',
-        doctor_sex : '',
-        department_id : '',
-        office_id : ''
+        register_time : '',
+        register_date : ''
       }
     };
   },
   methods: {
     //清空查询框内容
     clearSelect(){
-      this.select = {}
+      this.select = {
+        register_id : '',
+        register_status : '',
+        patient_name : '',
+        doctor_name : '',
+        register_time : '',
+        register_date : ''
+      }
+      this.selectRegisterList()
     },
 
     //弹出新增或更新就诊人弹窗
     showDialogVisable(type,row={
+      register_id : '',
+      register_status : '',
+      patient_name : '',
       doctor_name : '',
-      doctor_sex : '',
-      doctor_introduce : '',
-      doctor_good : '',
-      doctor_title : '',
-      department_id : '',
-      office_id : '',
+      register_time : '',
+      register_date : ''
     }){
       this.type = type
       this.ruleForm = row
@@ -259,17 +255,17 @@ export default {
       this.deleteData = row
     },
 
-    //删除医生
-    deleteDoctor(){
-      var url = '/api/doctor/delete_doctor'
+    //删除挂号记录
+    deleteRegister(){
+      var url = '/api/register/delete_register'
       var data = {
-        doctor_id : this.deleteData.doctor_id
+        register_id : this.deleteData.register_id
       }
       this.gRequest(url,data).then(res => {
         if(res.code == 200){
           this.returnMsg(res.msg)
           this.deleteDialogVisible = false
-          this.selectDoctorList()
+          this.selectRegisterList()
         }else{
           this.returnMsg(res.msg,'error')
         }
@@ -324,11 +320,19 @@ export default {
       })
     },
     
-    //查询所有医生信息
-    selectDoctorList(){
+    //查询所有挂号信息
+    selectRegisterList(){
       this.loading = true
-      var url = '/api/doctor/select_doctor_list_admin'
-      var data = this.select
+      var url = '/api/register/select_register_list_admin'
+      var data = {}
+      data.doctor_name = this.select.doctor_name
+      data.patient_name = this.select.patient_name
+      data.register_date = this.select.register_date
+      data.register_time = this.select.register_time
+      data.register_status = this.select.register_status
+      if(this.select.register_date != ''){
+        data.register_date = (this.select.register_date.getTime())/1000
+      }
       this.gRequest(url,data).then(res => {
         this.loading = false
         if(res.code == 200){
@@ -414,9 +418,9 @@ export default {
     }
   },
   created(){
-    this.selectOfficeList()
-    this.selectDoctorList()
-    this.selectDepartmentList()
+    // this.selectOfficeList()
+    this.selectRegisterList()
+    // this.selectDepartmentList()
   },
   components: {
     pagination

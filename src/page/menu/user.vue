@@ -4,97 +4,56 @@
       <el-row class="input-box" :gutter="20">
         <!-- 姓名 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">姓名：</el-col>
+          <el-col :span="8" class="label">用户ID：</el-col>
           <el-col :span="16">
-            <el-input placeholder="请输入姓名" size="mini" v-model="select.doctor_name"></el-input>
+            <el-input placeholder="请输入用户ID" size="mini" v-model="select.user_id"></el-input>
           </el-col>
         </el-col>
-        <!-- 性别选择 -->
+
+        <!-- 姓名 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">部门：</el-col>
+          <el-col :span="8" class="label">用户昵称：</el-col>
           <el-col :span="16">
-            <el-select size="mini"  v-model="select.department_name" placeholder="请选择部门">
-              <el-option
-                v-for="item in departmentList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <el-input placeholder="请输入用户昵称" size="mini" v-model="select.user_nickname"></el-input>
           </el-col>
         </el-col>
-         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">头衔：</el-col>
+
+        <!-- 姓名 -->
+        <el-col :span="6" class="input-label">
+          <el-col :span="8" class="label">openid：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_title" placeholder="请选择头衔">
-              <el-option label="主任医师" value="0"></el-option>
-              <el-option label="副主任医师" value="1"></el-option>
-              <el-option label="主治医师" value="2"></el-option>
-              <el-option label="住院医师" value="3"></el-option>
-              <!-- 0是主任医师，1是副主任医师，2是主治医师，3是住院医师 -->
-            </el-select>
+            <el-input placeholder="请输入openid" size="mini" v-model="select.open_id"></el-input>
           </el-col>
         </el-col>
-        
+
+        <el-button type="primary" @click="selectUserList()">查询</el-button>
+        <el-button type="primary" @click="clearSelect()">清空</el-button>
+        <!-- <el-button type="primary" @click="showDialogVisable(1)">新增</el-button> -->
       </el-row>
 
-      <el-row class="input-box" :gutter="20">
-        <!-- 性别选择 -->
-       
-        <!-- 性别选择 -->
-        <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">性别：</el-col>
-          <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_sex" placeholder="请选择性别">
-              <el-option label="男" value="1"></el-option>
-              <el-option label="女" value="0"></el-option>
-            </el-select>
-          </el-col>
-        </el-col>
-        <!-- 性别选择 -->
-        <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">科室：</el-col>
-          <el-col :span="16">
-            <el-select size="mini" v-model="select.office_name" placeholder="请选择科室">
-              <el-option
-                v-for="item in officeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </el-col>
-        </el-col>
-        <el-button type="primary" @click="selectDoctorList()">查询</el-button>
-        <el-button type="primary" @click="showDialogVisable(1)">新增</el-button>
-        <el-button type="primary" @click="clearSelect">清空</el-button>
-      </el-row>
 
     </div>
     <el-table
       :header-cell-style="tableHeaderColor"
       :data="tableData"
       size="mini"
+      height="520"
       stripe = true
       border
       style="width: 100%"
       v-loading="loading"
     >
-      <el-table-column prop="doctor_id" label="ID" width="80"></el-table-column>
-      <el-table-column prop="doctor_name" label="姓名" width="80"></el-table-column>
-      <el-table-column prop="department_name" label="部门"></el-table-column>
-      <el-table-column prop="office_name" label="科室"></el-table-column>
-      <el-table-column prop="doctor_sex" label="性别"></el-table-column>
-      <el-table-column prop="doctor_title" label="头衔"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_introduce" label="介绍"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_good" label="擅长"></el-table-column>
-      <el-table-column prop="doctor_payment" label="挂号费用"></el-table-column>
+      <el-table-column prop="user_id" label="ID" width="80"></el-table-column>
+      <el-table-column prop="user_nickname" label="用户昵称" width="80"></el-table-column>
+      <el-table-column prop="user_avatar" show-overflow-tooltip="true" label="用户头像"></el-table-column>
+      <el-table-column prop="open_id" show-overflow-tooltip="true" label="open_id"></el-table-column>
+      <el-table-column prop="token" show-overflow-tooltip="true" label="token"></el-table-column>
+      <!-- <el-table-column prop="doctor_title" label="头衔"></el-table-column> -->
       <el-table-column
             fixed="right"
             label="操作"
-            width="100">
+            width="200">
             <template slot-scope="scope">
-              <el-button @click="showDialogVisable(2,scope.row)" type="text" size="small">修改</el-button>
               <el-button @click="showDeleteDialog(scope.row)"   type="text" size="small">删除</el-button>
             </template>
        </el-table-column>
@@ -207,10 +166,9 @@ export default {
       ruleForm: {},
       deleteData : '',
       select : {
-        doctor_name : '',
-        doctor_sex : '',
-        department_id : '',
-        office_id : ''
+        user_id : '',
+        user_nickname : '',
+        open_id : ''
       }
     };
   },
@@ -261,15 +219,15 @@ export default {
 
     //删除医生
     deleteDoctor(){
-      var url = '/api/doctor/delete_doctor'
+      var url = '/api/user/delete_user'
       var data = {
-        doctor_id : this.deleteData.doctor_id
+        user_id : this.deleteData.user_id
       }
       this.gRequest(url,data).then(res => {
         if(res.code == 200){
           this.returnMsg(res.msg)
           this.deleteDialogVisible = false
-          this.selectDoctorList()
+          this.selectUserList()
         }else{
           this.returnMsg(res.msg,'error')
         }
@@ -324,10 +282,10 @@ export default {
       })
     },
     
-    //查询所有医生信息
-    selectDoctorList(){
+    //查询所有用户信息
+    selectUserList(){
       this.loading = true
-      var url = '/api/doctor/select_doctor_list_admin'
+      var url = '/api/user/select_user_list_admin'
       var data = this.select
       this.gRequest(url,data).then(res => {
         this.loading = false
@@ -414,9 +372,7 @@ export default {
     }
   },
   created(){
-    this.selectOfficeList()
-    this.selectDoctorList()
-    this.selectDepartmentList()
+    this.selectUserList()
   },
   components: {
     pagination

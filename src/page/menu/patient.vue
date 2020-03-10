@@ -4,6 +4,13 @@
       <el-row class="input-box" :gutter="20">
         <!-- 姓名 -->
         <el-col :span="6" class="input-label">
+          <el-col :span="8" class="label">就诊人ID：</el-col>
+          <el-col :span="16">
+            <el-input placeholder="请输入就诊人ID" size="mini" v-model="select.patient_id"></el-input>
+          </el-col>
+        </el-col>
+        <!-- 姓名 -->
+        <el-col :span="6" class="input-label">
           <el-col :span="8" class="label">姓名：</el-col>
           <el-col :span="16">
             <el-input placeholder="请输入姓名" size="mini" v-model="select.patient_name"></el-input>
@@ -149,7 +156,8 @@ export default {
         patient_name : '',
         patient_phone : '',
         patient_sex : '',
-        patient_card : ''
+        patient_card : '',
+        patient_id : ''
       },
       loading : false,
       deleteData : ''
@@ -162,7 +170,8 @@ export default {
         patient_name : '',
         patient_phone : '',
         patient_sex : '',
-        patient_card : ''
+        patient_card : '',
+        patient_id : ''
       }
     },
 

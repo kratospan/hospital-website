@@ -4,37 +4,32 @@
       <el-row class="input-box" :gutter="20">
         <!-- 姓名 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">姓名：</el-col>
+          <el-col :span="8" class="label">体检ID：</el-col>
           <el-col :span="16">
-            <el-input placeholder="请输入姓名" size="mini" v-model="select.doctor_name"></el-input>
+            <el-input placeholder="请输入体检ID" size="mini" v-model="select.test_id"></el-input>
           </el-col>
         </el-col>
-        <!-- 性别选择 -->
+        <!-- 就诊人ID  -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">部门：</el-col>
+          <el-col :span="8" class="label">就诊人ID：</el-col>
           <el-col :span="16">
-            <el-select size="mini"  v-model="select.department_name" placeholder="请选择部门">
-              <el-option
-                v-for="item in departmentList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <el-input placeholder="请输入就诊人ID" size="mini" v-model="select.patient_id"></el-input>
           </el-col>
         </el-col>
-         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">头衔：</el-col>
+
+        <!-- 预约日期 -->
+        <el-col :span="6" class="input-label">
+          <el-col :span="8" class="label">预约日期：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_title" placeholder="请选择头衔">
-              <el-option label="主任医师" value="0"></el-option>
-              <el-option label="副主任医师" value="1"></el-option>
-              <el-option label="主治医师" value="2"></el-option>
-              <el-option label="住院医师" value="3"></el-option>
-              <!-- 0是主任医师，1是副主任医师，2是主治医师，3是住院医师 -->
-            </el-select>
+            <el-date-picker
+              v-model="select.test_date"
+              type="date"
+              placeholder="选择预约日期">
+            </el-date-picker>
           </el-col>
         </el-col>
+
+         
         
       </el-row>
 
@@ -43,21 +38,18 @@
        
         <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">性别：</el-col>
+          <el-col :span="8" class="label">套餐ID：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.doctor_sex" placeholder="请选择性别">
-              <el-option label="男" value="1"></el-option>
-              <el-option label="女" value="0"></el-option>
-            </el-select>
+            <el-input placeholder="请输入套餐ID" size="mini" v-model="select.meal_id"></el-input>
           </el-col>
         </el-col>
         <!-- 性别选择 -->
         <el-col :span="6" class="input-label">
-          <el-col :span="8" class="label">科室：</el-col>
+          <el-col :span="8" class="label">预约状态：</el-col>
           <el-col :span="16">
-            <el-select size="mini" v-model="select.office_name" placeholder="请选择科室">
+            <el-select size="mini" v-model="select.test_status" placeholder="请选择预约状态">
               <el-option
-                v-for="item in officeList"
+                v-for="item in status"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
@@ -65,8 +57,8 @@
             </el-select>
           </el-col>
         </el-col>
-        <el-button type="primary" @click="selectDoctorList()">查询</el-button>
-        <el-button type="primary" @click="showDialogVisable(1)">新增</el-button>
+      
+        <el-button type="primary" @click="selectTestList()">查询</el-button>
         <el-button type="primary" @click="clearSelect">清空</el-button>
       </el-row>
 
@@ -75,20 +67,16 @@
       :header-cell-style="tableHeaderColor"
       :data="tableData"
       size="mini"
-      stripe = true
       border
       style="width: 100%"
       v-loading="loading"
     >
-      <el-table-column prop="doctor_id" label="ID" width="80"></el-table-column>
-      <el-table-column prop="doctor_name" label="姓名" width="80"></el-table-column>
-      <el-table-column prop="department_name" label="部门"></el-table-column>
-      <el-table-column prop="office_name" label="科室"></el-table-column>
-      <el-table-column prop="doctor_sex" label="性别"></el-table-column>
-      <el-table-column prop="doctor_title" label="头衔"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_introduce" label="介绍"></el-table-column>
-      <el-table-column show-overflow-tooltip="true" prop="doctor_good" label="擅长"></el-table-column>
-      <el-table-column prop="doctor_payment" label="挂号费用"></el-table-column>
+      <el-table-column prop="test_id" label="ID" width="80"></el-table-column>
+      <el-table-column prop="order_time" label="预约体检时的时间"></el-table-column>
+      <el-table-column prop="patient_id" label="就诊人ID"></el-table-column>
+      <el-table-column prop="test_date" label="预约时间"></el-table-column>
+      <el-table-column prop="meal_id" label="套餐ID"></el-table-column>
+      <el-table-column prop="test_status" label="预约状态"></el-table-column>
       <el-table-column
             fixed="right"
             label="操作"
@@ -115,7 +103,7 @@
       title="提示"
       :visible.sync="deleteDialogVisible"
         width="30%"
-      :before-close="handleClose">
+      >
       <span>是否确认删除</span>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="deleteDoctor()">确 定</el-button>
@@ -194,6 +182,11 @@ import pagination from "common/pagination";
 export default {
   data() {
     return {
+      status : [
+        {label : '预约成功',value : 0},
+        {label : '预约取消',value : 1},
+        {label : '预约过期',value : 3}
+      ],
       loading : false,
       departmentList : [],
       officeList : [],
@@ -207,17 +200,25 @@ export default {
       ruleForm: {},
       deleteData : '',
       select : {
-        doctor_name : '',
-        doctor_sex : '',
-        department_id : '',
-        office_id : ''
+        test_id : '',
+        test_date : '',
+        patient_id : '',
+        test_status : '',
+        meal_id : ''
       }
     };
   },
   methods: {
     //清空查询框内容
     clearSelect(){
-      this.select = {}
+      this.select = {
+        test_id : '',
+        test_date : '',
+        patient_id : '',
+        test_status : '',
+        meal_id : ''
+      }
+      this.selectTestList()
     },
 
     //弹出新增或更新就诊人弹窗
@@ -324,11 +325,19 @@ export default {
       })
     },
     
-    //查询所有医生信息
-    selectDoctorList(){
+    //查询所有体检信息
+    selectTestList(){
       this.loading = true
-      var url = '/api/doctor/select_doctor_list_admin'
-      var data = this.select
+      var url = '/api/test/select_test_list_admin' 
+      var data = {}
+      data.test_id = this.select.test_id
+      data.test_date = this.select.test_date
+      data.patient_id = this.select.patient_id
+      data.test_status = this.select.test_status
+      data.meal_id = this.select.meal_id
+      if(data.test_date != ''){
+         data.test_date = this.turnDateToTime(data.test_date)
+      }
       this.gRequest(url,data).then(res => {
         this.loading = false
         if(res.code == 200){
@@ -339,6 +348,7 @@ export default {
         }
       })
     },
+
 
     //查询部门信息
     selectDepartmentList(){
@@ -414,9 +424,7 @@ export default {
     }
   },
   created(){
-    this.selectOfficeList()
-    this.selectDoctorList()
-    this.selectDepartmentList()
+    this.selectTestList()
   },
   components: {
     pagination

@@ -130,7 +130,7 @@
           <el-input v-model="ruleForm.doctor_name" width="50"></el-input>
         </el-form-item>
         <el-form-item label="介绍" prop="introduce">
-          <el-input v-model="ruleForm.doctor_introduce"></el-input>
+          <el-input v-model="ruleForm.doctor_introduce" type="textarea"></el-input>
         </el-form-item>
         <el-form-item label="挂号费用" prop="payment">
           <el-input v-model="ruleForm.doctor_payment" type="number"></el-input>
