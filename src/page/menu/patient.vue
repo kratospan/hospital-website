@@ -53,6 +53,7 @@
       :data="tableData"
       size="mini"
       stripe = true
+      height="400"
       border
       style="width: 100%"
       v-loading="loading"
@@ -75,16 +76,7 @@
             </template>
        </el-table-column>
     </el-table>
-    <div align="left" style="margin-left: 60%; margin-top: 15px;">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="currentPage1"
-        :page-size="10"
-        layout="total, prev, pager, next"
-        :total = totalPage>
-      </el-pagination>
-    </div>
+   
 
     <!-- 删除提示框 -->
     <el-dialog

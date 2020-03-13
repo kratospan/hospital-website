@@ -30,7 +30,7 @@
         </el-col>
         
         <el-button type="primary" @click="selectMealList()">查询</el-button>
-        <el-button type="primary" @click="showDialogVisable(1)">新增</el-button>
+        <el-button type="primary" @click="addMealVisible = true">新增</el-button>
         <el-button type="primary" @click="clearSelect">清空</el-button>
       </el-row>
 
@@ -55,37 +55,40 @@
             label="操作"
             width="100">
             <template slot-scope="scope">
-              <el-button @click="showDialogVisable(2,scope.row)" type="text" size="small">修改</el-button>
-              <el-button @click="showDeleteDialog(scope.row)"   type="text" size="small">删除</el-button>
+              <el-button @click="showUpdateDialog(1,scope.row)" type="text" size="small">修改</el-button>
+              <el-button @click="showDeleteDialog(1,scope.row)"   type="text" size="small">删除</el-button>
             </template>
        </el-table-column>
     </el-table>
-    <!-- <div align="left" style="margin-left: 60%; margin-top: 15px;">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page.sync="currentPage1"
-        :page-size="10"
-        layout="total, prev, pager, next"
-        :total = totalPage>
-      </el-pagination>
-    </div> -->
 
     <!-- 删除提示框 -->
     <el-dialog
       title="提示"
-      :visible.sync="deleteDialogVisible"
+      :visible.sync="deleteMealVisible"
+        width="30%"
+      :before-close="handleClose">
+      <span>删除套餐将会删除与套餐相关的所有项目，是否确认删除</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="deleteMeal()">确 定</el-button>
+        <el-button @click="deleteMealVisible = false">取 消</el-button>
+      </span>
+    </el-dialog>
+
+    <!-- 删除提示框 -->
+    <el-dialog
+      title="提示"
+      :visible.sync="deleteProjectVisible"
         width="30%"
       :before-close="handleClose">
       <span>是否确认删除</span>
       <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="deleteDoctor()">确 定</el-button>
-        <el-button @click="deleteDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="deleteProject()">确 定</el-button>
+        <el-button @click="deleteProjectVisible = false">取 消</el-button>
       </span>
     </el-dialog>
 
-    <!-- 修改数据 -->
-    <el-dialog title="套餐信息" :visible.sync="dialogVisible" width="50%">
+    <!-- 添加数据 -->
+    <el-dialog title="添加套餐" :visible.sync="addMealVisible" width="50%">
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
         <el-form-item label="名称" prop="name">
           <el-input v-model="ruleForm.meal_name" width="50"></el-input>
@@ -93,55 +96,106 @@
         <el-form-item label="介绍" prop="introduce">
           <el-input v-model="ruleForm.meal_introduce" type="textarea"></el-input>
         </el-form-item>
-        <el-form-item label="注意事项" prop="payment">
+        <el-form-item label="注意事项" prop="attention">
           <el-input v-model="ruleForm.meal_attention" type="textarea" ></el-input>
         </el-form-item>
-        <!-- <el-form-item label="出生年月" prop="name">
-          <el-date-picker type="date" placeholder="选择日期" v-model="ruleForm.doctor_birth" style="width: 100%;"></el-date-picker>
-        </el-form-item> -->
         <el-form-item label="费用" prop="cost">
           <el-input v-model="ruleForm.meal_cost" type="number" ></el-input>
         </el-form-item>
-        <!-- 部门  -->
-        <el-form-item label="部门" prop="department_name">
-          <el-select v-model="ruleForm.department_id" @change="handleChange" placeholder="请选择部门">
-            <el-option
-                v-for="item in departmentList2"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-          </el-select>
-        </el-form-item>
-        <!-- 科室  -->
-        <el-form-item label="科室" prop="office_name">
-          <el-select v-model="ruleForm.office_id" placeholder="请选择科室">
-            <el-option
-                v-for="item in officeList2"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-          </el-select>
-        </el-form-item>
 
-        <el-form-item label="擅长" prop="good">
-          <el-input v-model="ruleForm.doctor_good"></el-input>
-        </el-form-item>
-        <el-form-item label="头衔" prop="doctor_title">
-          <el-select v-model="ruleForm.doctor_title" placeholder="请选择头衔">
-            <el-option label="主任医生" value="0"></el-option>
-            <el-option label="副主任医生" value="1"></el-option>
-            <el-option label="主治医师" value="2"></el-option>
-            <el-option label="住院医师" value="3"></el-option>
-          </el-select>
-        </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm()">确认</el-button>
-          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="addMeal()">确认</el-button>
+          <el-button @click="addMealVisible = false">取消</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
+
+    <!-- 添加数据 -->
+    <el-dialog title="修改套餐" :visible.sync="updateMealVisible" width="50%">
+      <el-form :model="updateMealData" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="updateMealData.meal_name" width="50"></el-input>
+        </el-form-item>
+        <el-form-item label="介绍" prop="introduce">
+          <el-input v-model="updateMealData.meal_introduce" type="textarea"></el-input>
+        </el-form-item>
+        <el-form-item label="注意事项" prop="payment">
+          <el-input v-model="updateMealData.meal_attention" type="textarea" ></el-input>
+        </el-form-item>
+        <el-form-item label="费用" prop="cost">
+          <el-input v-model="updateMealData.meal_cost" type="number" ></el-input>
+        </el-form-item>
+        <!-- 部门  -->
+        <el-form-item label="项目管理" prop="department_name">
+          <el-button @click="addProjectVisible = true">新建项目</el-button>
+        </el-form-item>
+
+        <el-table
+          :header-cell-style="tableHeaderColor"
+          :data="projectList"
+          size="mini"
+          stripe = true
+          border
+          height="250"
+          style="width: 100%"
+          v-loading="loading"
+        >
+          <el-table-column prop="project_id" label="ID" width="80"></el-table-column>
+          <el-table-column prop="project_name" label="名称"></el-table-column>
+          <el-table-column prop="project_introduce" show-overflow-tooltip="true" label="介绍"></el-table-column>
+          <el-table-column
+                fixed="right"
+                label="操作"
+                width="100">
+                <template slot-scope="scope">
+                  <el-button @click="showUpdateDialog(2,scope.row)" type="text" size="small">修改</el-button>
+                  <el-button @click="showDeleteDialog(2,scope.row)"   type="text" size="small">删除</el-button>
+                </template>
+          </el-table-column>
+        </el-table>
+        
+        <el-form-item>
+          <el-button type="primary" @click="updateMeal()">确认</el-button>
+          <el-button @click="updateMealVisible = false">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <!-- 修改数据 -->
+    <el-dialog title="添加项目" :visible.sync="addProjectVisible" width="50%">
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="ruleForm.project_name" width="50"></el-input>
+        </el-form-item>
+        <el-form-item label="介绍" prop="introduce">
+          <el-input v-model="ruleForm.project_introduce" type="textarea"></el-input>
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" @click="addProject()">确认</el-button>
+          <el-button @click="addProjectVisible = false">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    <!-- 添加数据 -->
+    <el-dialog title="修改项目" :visible.sync="updateProjectVisible" width="50%">
+      <el-form :model="updateProjectData" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="名称" prop="name">
+          <el-input v-model="updateProjectData.project_name" width="50"></el-input>
+        </el-form-item>
+        <el-form-item label="介绍" prop="introduce">
+          <el-input v-model="updateProjectData.project_introduce" type="textarea"></el-input>
+        </el-form-item>
+       
+        <el-form-item>
+          <el-button type="primary" @click="updateProject()">确认</el-button>
+          <el-button @click="updateProjectVisible = false">取消</el-button>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+
+    
   </div>
 
 
@@ -153,14 +207,15 @@ export default {
   data() {
     return {
       loading : false,
-      departmentList : [],
-      officeList : [],
-      departmentList2 : [],
-      officeList2 : [],
-      deleteDialogVisible: false,
-      dialogVisible : false,
-      totalPage: 100,
       type : 0,  //判断修改弹出框是什么状态 0是默认没有被调用，1是新增，2是修改
+      updateMealData : {},
+      updateProjectData : {},
+      addMealVisible : false,
+      updateMealVisible : false,
+      addProjectVisible : false,
+      updateProjectVisible : false,
+      deleteMealVisible : false,
+      deleteProjectVisible : false,
       tableData: [],
       ruleForm: {},
       deleteData : '',
@@ -182,106 +237,132 @@ export default {
       this.selectMealList()
     },
 
-    //弹出新增或更新就诊人弹窗
-    showDialogVisable(type,row={
-      meal_name : '',
-        meal_cost : '',
-        meal_id : ''
-    }){
-      this.type = type
-      this.ruleForm = row
-      this.dialogVisible = 1
-      if(this.type == 2){
-        this.handleChange(this.ruleForm.department_id)
-      }
-    },
-
-    //提交表单
-    submitForm(){
-      if(this.type == 1){
-        this.addDoctor()
+    //判断显示套餐或项目修改对话框
+    showUpdateDialog(type,row){
+      if(type == 1){
+        this.updateMealVisible = true
+        this.updateMealData = JSON.parse(JSON.stringify(row))
+        this.selectProjectList()
       }
 
-      if(this.type == 2){
-        if(this.ruleForm.doctor_payment < 0){
-          this.returnMsg('挂号费用不能小于0','error')
-          return
-        }
-        this.updateDoctor()
+      if(type == 2){
+        this.updateProjectVisible = true
+        this.updateProjectData = JSON.parse(JSON.stringify(row))
       }
     },
 
     //显示删除提示框
-    showDeleteDialog(row){
-      this.deleteDialogVisible = true
-      this.deleteData = row
+    showDeleteDialog(type,row){
+     if(type == 1){
+        this.deleteMealVisible = true
+        this.deleteData = row
+     }
+
+     if(type == 2){
+        this.deleteProjectVisible = true
+        this.deleteData = row
+     }
     },
 
-    //删除医生
-    deleteDoctor(){
-      var url = '/api/doctor/delete_doctor'
-      var data = {
-        doctor_id : this.deleteData.doctor_id
-      }
-      this.gRequest(url,data).then(res => {
-        if(res.code == 200){
-          this.returnMsg(res.msg)
-          this.deleteDialogVisible = false
-          this.selectMealList()
-        }else{
-          this.returnMsg(res.msg,'error')
-        }
-      })
-    },
-
-    //修改医生信息
-    updateDoctor(){
-      var url = '/api/doctor/update_doctor'
-      var data = JSON.parse(JSON.stringify(this.ruleForm))
-      delete data.office_name
-      delete data.department_name
-      if(data.doctor_sex == '男'){
-        data.doctor_sex = 1
-      }else{
-        data.doctor_sex = 0
-      }
-      switch (data.doctor_title){
-        case '主任医师':
-          data.doctor_title = 0
-        case '副主任医师':
-          data.doctor_title = 1
-        case '主治医师':
-          data.doctor_title = 2
-        case '住院医师':
-          data.doctor_title = 3
-      }
-      this.gRequest(url,data).then(res => {
-        if(res.code == 200){
-          this.returnMsg(res.msg)
-          this.dialogVisible= false
-          this.selectMealList()
-        }else{
-          this.returnMsg(res.msg,'error')
-        }
-      })
-    },
-
-
-    //新增医生信息
-    addDoctor(){
-      var url = '/api/doctor/add_doctor'
+    //添加套餐
+    addMeal(){
+      var url = '/api/meal/add_meal'
       var data = this.ruleForm
       this.gRequest(url,data).then(res => {
         if(res.code == 200){
           this.returnMsg(res.msg)
-          this.dialogVisible= false
           this.selectMealList()
+          this.addMealVisible = false
+          this.ruleForm = {}
         }else{
           this.returnMsg(res.msg,'error')
         }
       })
     },
-    
+
+    //添加项目
+    addProject(){
+      var url = '/api/project/add_project'
+      var data = this.ruleForm
+      data.meal_id = this.updateMealData.meal_id
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.ruleForm = {}
+          this.selectProjectList()
+          this.addProjectVisible = false
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //更新套餐
+    updateMeal(){
+      var url = '/api/meal/update_meal'
+      var data = this.updateMealData
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.updateMealData = {}
+          this.selectMealList()
+          this.updateMealVisible = false
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //更新项目
+    updateProject(){ 
+      var url = '/api/project/update_project'
+      var data = this.updateProjectData
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.updateProjectData = {}
+          this.selectProjectList()
+          this.updateProjectVisible = false
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //删除套餐
+    deleteMeal(){
+      var url = '/api/meal/delete_meal'
+      var data = {
+        meal_id : this.deleteData.meal_id
+      }
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.selectMealList()
+          this.deleteMealVisible = false
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //删除项目
+    deleteProject(){
+      var url = '/api/project/delete_project'
+      var data = {
+        project_id : this.deleteData.project_id
+      }
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.selectProjectList()
+          this.deleteProjectVisible = false
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
     //查询所有套餐信息
     selectMealList(){
       this.loading = true
@@ -298,83 +379,31 @@ export default {
       })
     },
 
-    //查询部门信息
-    selectDepartmentList(){
+    //查询所有项目信息
+    selectProjectList(){
       this.loading = true
-      var url = '/api/department/select_department'
-      var data = ''
-      this.gRequest(url,data).then(res => {
-        this.loading = false
-        if(res.code == 200){
-          var list = res.data
-          var arr2 = []
-          var arr = []
-          list.forEach(function(element){
-            var item = {'label':element.department_name,'value':element.department_name}
-            var item2 = {'label':element.department_name,'value':element.department_id}
-            arr.push(item)
-            arr2.push(item2)
-          });
-          this.departmentList = arr
-          this.departmentList2 = arr2
-        }else{
-          this.returnMsg(res.msg,'error')
-        }
-      })
-    },
-
-    //查询科室信息
-    selectOfficeList(){
-      this.loading = true
-      var url = '/api/office/select_office_list_admin'
-      var data = ''
-      this.gRequest(url,data).then(res => {
-        this.loading = false
-        if(res.code == 200){
-          var list = res.data
-          var arr = []
-          list.forEach(function(element){
-            var item = {'label':element.office_name,'value':element.office_name}
-            arr.push(item)
-          });
-          this.officeList = arr
-        }else{
-          this.returnMsg(res.msg,'error')
-        }
-      })
-    },
-
-    //根据部门查询科室信息
-    handleChange(value){
-      this.ruleForm.office_id = ''
-      var url = '/api/office/select_office'
+      var url = '/api/project/select_project'
       var data = {
-        department_id : value
+        meal_id : this.updateMealData.meal_id
       }
       this.gRequest(url,data).then(res => {
+        this.loading = false
         if(res.code == 200){
-          var list = res.data
-          var arr = []
-          list.forEach(function(element){
-            var item = {'label':element.office_name,'value':element.office_id}
-            arr.push(item)
-          });
-          this.officeList2 = arr
+          this.projectList = res.data
         }else{
           this.returnMsg(res.msg,'error')
         }
       })
-      // alert('选择的部门是:',value)
     }
+
+
   },
   watch: {
     DateValue(newval, oldval) {
     }
   },
   created(){
-    // this.selectOfficeList()
     this.selectMealList()
-    // this.selectDepartmentList()
   },
   components: {
     pagination

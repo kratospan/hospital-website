@@ -15,6 +15,7 @@ import register from '../page/menu/register.vue'
 import schedul from '../page/menu/schedul.vue'
 import test from '../page/menu/test.vue'
 import user from '../page/menu/user.vue'
+import office from '../page/menu/office.vue'
 
 // 要告诉 vue 使用 vueRouter
 Vue.use(VueRouter);
@@ -72,6 +73,11 @@ let routes = [
         path: 'test',
         component: test,
         name: '体检管理'
+      },
+      {
+        path: 'office',
+        component: office,
+        name: '部门和科室管理'
       },
       {
         path: 'user',

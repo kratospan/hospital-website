@@ -218,6 +218,7 @@ export default {
     //清空查询框内容
     clearSelect(){
       this.select = {}
+      this.selectDoctorList()
     },
 
     //弹出新增或更新就诊人弹窗
@@ -231,7 +232,7 @@ export default {
       office_id : '',
     }){
       this.type = type
-      this.ruleForm = row
+      this.ruleForm = JSON.parse(JSON.stringify(row))
       this.dialogVisible = 1
       if(this.type == 2){
         this.handleChange(this.ruleForm.department_id)

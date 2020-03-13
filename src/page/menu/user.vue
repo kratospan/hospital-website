@@ -176,6 +176,7 @@ export default {
     //清空查询框内容
     clearSelect(){
       this.select = {}
+      this.selectUserList()
     },
 
     //弹出新增或更新就诊人弹窗

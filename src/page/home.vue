@@ -2,9 +2,8 @@
 <div class="home-container">
   <el-row class="container">
     <el-col :span="24" class="header">
-            <el-col :span="10" class="logo" :class="'logo-width'">
-              <el-col class="logo-img"></el-col>
-              <el-col class="logo-title">{{sysName}}</el-col>
+            <el-col :span="16" class="logo" :class="'logo-width'">
+              <el-col class="logo-title" style="color: #fff;">{{sysName}}</el-col>
             </el-col>
             <el-col :span="5" class="breadcrumb-container">
               <el-breadcrumb separator="/" class="breadcrumb-inner">
@@ -15,8 +14,7 @@
                 <el-dropdown trigger="hover">
                     <span class="el-dropdown-link userinfo-inner">{{sysUserName}}</span>
                     <el-dropdown-menu slot="dropdown">
-                        <el-dropdown-item>我的消息</el-dropdown-item>
-                        <el-dropdown-item>修改密码</el-dropdown-item>
+                        <el-dropdown-item>设置</el-dropdown-item>
                         <el-dropdown-item divided @click.native="logoutFun">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -41,10 +39,6 @@
        <div class="grid-content bg-purple-light">
          <el-row class="nav-tabs">
           <el-col :span="24">
-            <!-- <div @click="changeRouter(index)" v-for="(option, index) in arry" class="cus-tab-box" :class="activepath==option.path?'activeTab':''">
-              <span>{{option.name}}</span>
-              <span @click.stop="arry.length!=1 && removeTab(index)"><i class="fa fa-times close-icon" aria-hidden="true"></i></span>
-            </div> -->
           </el-col>
          </el-row>
          <el-col :span="24" class="content-wrapper">
