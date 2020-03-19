@@ -16,6 +16,7 @@ import schedul from '../page/menu/schedul.vue'
 import test from '../page/menu/test.vue'
 import user from '../page/menu/user.vue'
 import office from '../page/menu/office.vue'
+import upload from '../page/menu/upload.vue'
 
 // 要告诉 vue 使用 vueRouter
 Vue.use(VueRouter);
@@ -83,6 +84,11 @@ let routes = [
         path: 'user',
         component: user,
         name: '用户管理'
+      },
+      {
+        path: 'upload',
+        component: upload,
+        name: '上传文件'
       },
     ]
   },

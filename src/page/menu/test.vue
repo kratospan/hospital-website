@@ -64,7 +64,6 @@
 
     </div>
     <el-table
-      :header-cell-style="tableHeaderColor"
       :data="tableData"
       size="mini"
       border
@@ -82,7 +81,7 @@
             label="操作"
             width="100">
             <template slot-scope="scope">
-              <el-button v-if="scope.row.test_status == '预约成功'" @click="showDialogVisable(2,scope.row)" type="text" size="small">修改</el-button>
+              <el-button v-if="scope.row.test_status == '预约成功'" @click="showDialogVisable(scope.row)" type="text" size="small">修改</el-button>
               <el-button @click="showDeleteDialog(scope.row)"   type="text" size="small">删除</el-button>
             </template>
        </el-table-column>
@@ -112,26 +111,25 @@
     </el-dialog>
 
     <!-- 修改数据 -->
-    <el-dialog title="上传报告" :visible.sync="dialogVisible" width="30%">
-      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
-        <el-form-item label="上传体检报告" prop="name">
-        </el-form-item>
+    <el-dialog title="上传体检报告" :visible.sync="dialogVisible" width="30%">
+      <el-form>
         <el-upload
-          class="upload-demo"
-          action="https://jsonplaceholder.typicode.com/posts/"
-          :on-preview="handlePreview"
-          :on-remove="handleRemove"
-          :before-remove="beforeRemove"
+          :action="actionPath"
+          limit= "3"
+          accept="image/jpeg,image/gif,image/png,image/bmp"
+          :before-upload="beforeAvatarUpload"
+          :data="postData"
           multiple
-          :limit="3"
+          :file-list="fileList"
+          :before-remove="beforeRemove"
+          :on-remove="handleRemove"
           :on-exceed="handleExceed"
-          :file-list="fileList">
+          :on-success="handleAvatarSuccess">
           <el-button size="small" type="primary">点击上传</el-button>
-          <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
         </el-upload>
 
         <el-form-item style="margin-top:40px;">
-          <el-button type="primary" @click="submitForm()">确认</el-button>
+          <el-button type="primary" @click="dialogVisible = false">确认</el-button>
           <el-button @click="dialogVisible = false">取消</el-button>
         </el-form-item>
       </el-form>
@@ -143,7 +141,7 @@
 </template>
 <script>
 import pagination from "common/pagination";
-// import oss from "http://gosspublic.alicdn.com/aliyun-oss-sdk-4.4.4.min.js";
+import {genUpToken} from "../../api/qianniu"; 
 export default {
   data() {
     return {
@@ -170,25 +168,58 @@ export default {
         patient_id : '',
         test_status : '',
         meal_id : ''
-      }
+      },
+
+      //千牛云上传文件有关的参数
+      token : '',
+      actionPath:'https://upload-z2.qiniup.com',
+      imageUrl: '',
+      postData : {},
+      fileList : '',
+      test_id : ''
     };
   },
+
   methods: {
 
+    submitPhotos(){
+      console.log('图像列表是:'+this.fileList)
+      this.add_photos()
+    },
+
+    handleAvatarSuccess(res, file) {
+        var imageUrl = 'http://q7fb5tf1c.bkt.clouddn.com/'+ res.key
+        console.log(file)
+        this.addPhotos(file.name,imageUrl)
+    },
+
     handleRemove(file, fileList) {
-        console.log(file, fileList);
+        this.deletePhotos(file)
     },
-    
-    handlePreview(file) {
-      console.log(file);
-    },
-    
+
     handleExceed(files, fileList) {
-      this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+        this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
     },
+
     beforeRemove(file, fileList) {
-      return this.$confirm(`确定移除 ${ file.name }？`);
+        return this.$confirm(`确定移除 ${ file.name }？`);
     },
+
+      beforeAvatarUpload(file) {
+        const isJPG = file.type === 'image/jpeg';
+        const isLt2M = file.size / 1024 / 1024 < 2;
+
+
+ 
+        if (!isJPG) {
+          this.$message.error('上传头像图片只能是 JPG 格式!');
+        }
+        if (!isLt2M) {
+          this.$message.error('上传头像图片大小不能超过 2MB!');
+        }
+
+        return isJPG && isLt2M;
+      },
 
     //清空查询框内容
     clearSelect(){
@@ -202,22 +233,57 @@ export default {
       this.selectTestList()
     },
 
-    //弹出新增或更新就诊人弹窗
-    showDialogVisable(type,row={
-      doctor_name : '',
-      doctor_sex : '',
-      doctor_introduce : '',
-      doctor_good : '',
-      doctor_title : '',
-      department_id : '',
-      office_id : '',
-    }){
-      this.type = type
-      this.ruleForm = row
-      this.dialogVisible = 1
-      if(this.type == 2){
-        this.handleChange(this.ruleForm.department_id)
+    addPhotos(name,imageUrl){
+      var url = '/api/test/add_photo' 
+      var data = {
+        'test_id' : this.test_id,
+        'name' : name,
+        'photo_url' : imageUrl
       }
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.returnMsg(res.msg)
+          this.selectPhotos()
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    deletePhotos(file){
+      var url = '/api/test/delete_photo' 
+      var data = {
+        'photo_id' : file.photo_id
+      }
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.selectPhotos()
+           this.returnMsg(res.msg)
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    selectPhotos(){
+      var url = '/api/test/select_photo' 
+      var data = {
+        'test_id' : this.test_id
+      }
+      this.gRequest(url,data).then(res => {
+        if(res.code == 200){
+          this.fileList = res.data
+        }else{
+          this.returnMsg(res.msg,'error')
+        }
+      })
+    },
+
+    //弹出新增或更新就诊人弹窗
+    showDialogVisable(row){
+      this.test_id = row.test_id
+      this.dialogVisible = 1
+      this.selectPhotos()
     },
 
     //提交表单
@@ -232,6 +298,10 @@ export default {
           return
         }
         this.updateDoctor()
+      }
+
+      if(this.type == 3){
+        alert(this.fileList)
       }
     },
 
@@ -271,6 +341,15 @@ export default {
   },
   created(){
     this.selectTestList()
+    var policy = {};
+      var bucketName = 'selfvisitsystem';
+      var AK ='aDUdGI40J_30bUFMbPEXRGB89wQWHPy_pGzePIh7';
+      var SK = 'YzCFt2vw0vmscYGTKZbolVUjEaPJg2Z49IBxtpQI';
+      var deadline = Math.round(new Date().getTime() / 1000) + 3600;
+      policy.scope = bucketName;
+      policy.deadline = deadline;
+      var token=genUpToken(AK, SK, policy);
+      this.postData.token=token;
   },
   components: {
     pagination
@@ -285,6 +364,10 @@ export default {
     background:#f5f5f5 !important;
     color: #303133 !important;
   }
+
+  .el-upload-list__item {
+      transition: none !important;
+    }
 .container-box {
   .form-box {
     padding: 10px 20px;
