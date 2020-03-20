@@ -84,12 +84,7 @@ let routes = [
         path: 'user',
         component: user,
         name: '用户管理'
-      },
-      {
-        path: 'upload',
-        component: upload,
-        name: '上传文件'
-      },
+      }
     ]
   },
 ];

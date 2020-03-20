@@ -16,7 +16,7 @@ module.exports = {
           changeOrigin: true, //支持跨域
         },
         '/api': {
-          target: 'http://localhost:80/tp5/public/index.php/api', // 后端接口地址
+          target: 'http://123.56.71.60:613/index.php/api', // 后端接口地址
           changeOrigin: true, // 是否允许跨越
           pathRewrite: {
             '^/api': '/'

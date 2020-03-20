@@ -76,8 +76,29 @@ export default {
               password: this.ruleForm2.checkPass
             };
             sessionStorage.setItem("user", JSON.stringify(params)); // session存储用户信息
-            this.logining = false;
-            this.$router.push({ path: "/patient/patient" });  // 去主页
+
+            var url = '/api/login/login_admin'
+            var data = {
+              admin_name : this.ruleForm2.account,
+              admin_pwd : this.ruleForm2.checkPass
+            }
+            var that = this
+            this.gRequest(url,data).then(res => {
+              if(res.code == 200){
+                // this.returnMsg(res.msg)
+                this.logining = false;
+                setTimeout(function(){
+                  that.$router.push({ path: "/patient/patient" });  // 去主页
+                },1000)
+              }else{
+                this.logining = false;
+                this.returnMsg(res.msg,'error')
+              }
+            })
+
+
+            
+            
           }, 1000);
           // const params = {
           //   userName: this.ruleForm2.account,
