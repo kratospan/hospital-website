@@ -85,7 +85,7 @@ export default {
             var that = this
             this.gRequest(url,data).then(res => {
               if(res.code == 200){
-                // this.returnMsg(res.msg)
+                this.returnMsg("登录成功，跳转中")
                 this.logining = false;
                 setTimeout(function(){
                   that.$router.push({ path: "/patient/patient" });  // 去主页

@@ -65,7 +65,7 @@
             </el-select>
           </el-col>
         </el-col>
-        <el-button type="primary" @click="selectDoctorList()">查询</el-button>
+        <el-button type="primary" @click="selectDoctor()">查询</el-button>
         <el-button type="primary" @click="showDialogVisable(1)">新增</el-button>
         <el-button type="primary" @click="clearSelect">清空</el-button>
       </el-row>
@@ -77,6 +77,7 @@
       size="mini"
       stripe = true
       border
+      height="430"
       style="width: 100%"
       v-loading="loading"
     >
@@ -92,6 +93,7 @@
       <el-table-column
             fixed="right"
             label="操作"
+            height="300"
             width="100">
             <template slot-scope="scope">
               <el-button @click="showDialogVisable(2,scope.row)" type="text" size="small">修改</el-button>
@@ -99,16 +101,17 @@
             </template>
        </el-table-column>
     </el-table>
-    <!-- <div align="left" style="margin-left: 60%; margin-top: 15px;">
+    <div align="left" style="margin-left: 55%; margin-top: 15px;">
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page.sync="currentPage1"
-        :page-size="10"
+        :current-page.sync="page"
+        :page-size="15"
+        background
         layout="total, prev, pager, next"
         :total = totalPage>
       </el-pagination>
-    </div> -->
+    </div>
 
     <!-- 删除提示框 -->
     <el-dialog
@@ -206,6 +209,8 @@ export default {
       tableData: [],
       ruleForm: {},
       deleteData : '',
+      page : 1,
+      totalPage : 0,
       select : {
         doctor_name : '',
         doctor_sex : '',
@@ -218,6 +223,7 @@ export default {
     //清空查询框内容
     clearSelect(){
       this.select = {}
+      this.page = 1
       this.selectDoctorList()
     },
 
@@ -237,6 +243,12 @@ export default {
       if(this.type == 2){
         this.handleChange(this.ruleForm.department_id)
       }
+    },
+
+    //绑定页码变化
+    handleCurrentChange(){
+      // console.log('当前页面为:',this.page)
+      this.selectDoctorList()
     },
 
     //提交表单
@@ -281,13 +293,17 @@ export default {
     updateDoctor(){
       var url = '/api/doctor/update_doctor'
       var data = JSON.parse(JSON.stringify(this.ruleForm))
+      console.log('没有改之前的数据',this.ruleForm)
       delete data.office_name
       delete data.department_name
       if(data.doctor_sex == '男'){
         data.doctor_sex = 1
-      }else{
+      }
+
+      if(data.doctor_sex == '女'){
         data.doctor_sex = 0
       }
+
       switch (data.doctor_title){
         case '主任医师':
           data.doctor_title = 0
@@ -298,6 +314,7 @@ export default {
         case '住院医师':
           data.doctor_title = 3
       }
+      
       this.gRequest(url,data).then(res => {
         if(res.code == 200){
           this.returnMsg(res.msg)
@@ -324,16 +341,23 @@ export default {
         }
       })
     },
+
+    selectDoctor(){
+      this.page = 1
+      this.selectDoctorList()
+    },
     
     //查询所有医生信息
     selectDoctorList(){
       this.loading = true
-      var url = '/api/doctor/select_doctor_list_admin'
+      var url = '/api/doctor/select_doctor_list_view'
       var data = this.select
+      data.page = this.page
       this.gRequest(url,data).then(res => {
         this.loading = false
         if(res.code == 200){
           // this.returnMsg(res.msg)
+          this.totalPage = res.num
           this.tableData = res.data
         }else{
           this.returnMsg(res.msg,'error')

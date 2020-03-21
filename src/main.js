@@ -9,6 +9,9 @@ import App from './App.vue';
 import 'font-awesome/css/font-awesome.min.css';
 import router from "./router";
 import VCharts from 'v-charts'
+import axios from 'axios';
+import apiConfig from '../config/api.config.js'
+axios.defaults.baseURL=apiConfig.baseURL
 
 Vue.use(ElementUI,{size: 'mini',align : 'center'});
 Vue.use(Router);
