@@ -1,4 +1,4 @@
-# Admin-system
+# Hospital-Admin-system
 
 ## Build Setup
 
